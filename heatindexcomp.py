@@ -1,79 +1,47 @@
-# ## Initaialize the data
-# data = {'date' : [],
-#         'time': [],
-#         'tempout': []}
+from readdata import read_data 
 
 
-# # Read and Parse the data
-# filename = 'data\\wxobs20170821.txt'
-# with open(filename, 'r') as datafile:
-
-#     ##read the firth three lines(headers)
-#     for _ in range(3):
-#         datafile.readline()
-
-
-#     #read and parse the rest of the file
-#     for line in datafile:
-#         split_line = line.split()
-#         data['date'].append(split_line[0])
-#         data['time'].append(split_line[1])
-#         #change the line to float
-#         data['tempout'].append(float(split_line[2]))
-
-# ## convert the data to float
-
-# ##Debug
-# print(data['tempout'])
-
-## column names and column indices
-columns = {'date':0, 'time':1, 'tempout':2, 'windspeed':7, 'windchill':12}
+# column names and column indices
+columns = {'date':0, 'time':1, 'tempout':2, 'humout':5, 'heatindex':13}
 
 # Data types for each column (only if non-string)
-types = {'tempout': float, 'windspeed':float, 'windchill':float}
+types = {'tempout': float, 'humout':float, 'heatindex':float}
 
 #inituialise my data variables
 data = {}
 for column in columns:
     data[column] = []
 
+##read data from fileread = rea
+data = read_data(columns, types=types)
 
-
-#Reand Parse the data
-filename = 'data\\wxobs20170821.txt'
-with open(filename,'r') as datafile:
-
-    ##read the firth three lines(headers)
-    for _ in range(3):
-        datafile.readline()
-
-
-    #Read and Parse the rest of the file
-    for line in datafile:
-        split_line =line.split()
-        for column in columns:
-            i = columns[column]
-            t = types.get(column,str)
-            value =t(split_line[i])
-            data[column].append(value)
 
 # fucntion calculating wind chill factor
-def compute_windchil(t,v):
-    a = 35.74
-    b = 0.6215
-    c = 35.75
-    d = 0.4275
+def compute_heatindex(t,rh_pct):
+    a = -42.379
+    b = 2.04901523
+    c = 10.14333127
+    d = -0.22475541
+    e = -0.00683783
+    f = -0.05481717
+    g = 0.00122874
+    h = 0.00085282
+    i = -0.0000019
 
-    v2 = v**2
-    wci = a + (b * t) - (c * v2) + (d * t * v2)
+    rh =rh_pct / 100
 
-    return wci
+    hi = a + (b * t) + (c * rh) + (d * t * rh)
+    + (e * t**2) + (f * rh**2) + (g * t**2 * rh)
+    + (h * t * rh**2) + (i * t**2 * rh**2)
+
+
+    return hi
 
 
 ##comout wind chill
-windchill = []
-for temp, windspeed in zip(data['tempout'], data['windspeed']):
-    windchill.append(compute_windchil(temp,windspeed))
+heatindex = []
+for temp, hum in zip(data['tempout'], data['humout']):
+    heatindex.append(compute_heatindex(temp,hum))
     
     
 #     #Debug
@@ -82,9 +50,8 @@ for temp, windspeed in zip(data['tempout'], data['windspeed']):
 
 ## Output comparison
 print ("                    Original Computed")
-print('  dATE tIME wINDCHILL wIndschill Difference')
+print('  Date Time Heat INDX Heat INDX Difference')
 print (' --------------------------------------------')
-zip_data = zip(data['date'],data['time'], data['windchill'],windchill)
-for date, time, wr_org, wc_comp in zip_data:
-    wc_diff = wr_org - wc_comp
-    print (f'{date} {time :.6} {wr_org:9.6f} {wc_comp:9.6f} {wc_diff:10.6f}')
+#zip_data = zip(data['date'],data['time'], data['windchill'],windchill)
+for date, time, hi_org, hi_comp in zip(data['date'], data['time'],data['tempout'], data['humout']):
+    print (f'{date} {time :>6} {hi_org:9.6f} {hi_comp:9.6f} {hi_org-hi_comp:10.6f}')
