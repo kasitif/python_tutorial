@@ -1,4 +1,5 @@
-from readdata import read_data 
+from readdata import read_data
+from printing import print_comparison 
 
 
 # column names and column indices
@@ -49,9 +50,4 @@ for temp, hum in zip(data['tempout'], data['humout']):
 #     print (f'{wc_data:.5f} {wc_comp:.5f} {wc_data-wc_comp:.5f}')
 
 ## Output comparison
-print ("                    Original Computed")
-print('  Date Time Heat INDX Heat INDX Difference')
-print (' --------------------------------------------')
-#zip_data = zip(data['date'],data['time'], data['windchill'],windchill)
-for date, time, hi_org, hi_comp in zip(data['date'], data['time'],data['tempout'], data['humout']):
-    print (f'{date} {time :>6} {hi_org:9.6f} {hi_comp:9.6f} {hi_org-hi_comp:10.6f}')
+print_comparison('Heat IDX', data['date'], data['time'], data['heatindex'], heatindex)
